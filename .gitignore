@@ -1,0 +1,30 @@
+# ===== ENV =====
+.env
+.env.*
+!.env.example
+
+# ===== NODE / NEXT.JS =====
+node_modules/
+.next/
+out/
+npm-debug.log*
+yarn-error.log*
+
+# ===== GO =====
+bin/
+*.exe
+*.out
+*.test
+*.log
+
+# ===== DATABASE =====
+postgres_data/
+
+# ===== DOCKER =====
+*.pid
+docker-compose.override.yml
+
+# ===== OS / EDITOR =====
+.DS_Store
+.idea/
+.vscode/
