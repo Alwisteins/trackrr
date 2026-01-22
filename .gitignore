@@ -4,11 +4,11 @@
 !.env.example
 
 # ===== NODE / NEXT.JS =====
-node_modules/
-.next/
-out/
-npm-debug.log*
-yarn-error.log*
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/npm-debug.log*
+frontend/yarn-error.log*
 
 # ===== GO =====
 bin/
