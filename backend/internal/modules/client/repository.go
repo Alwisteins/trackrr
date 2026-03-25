@@ -11,6 +11,7 @@ import (
 
 type Repository interface {
 	CreateClient(ctx context.Context, req CreateClientRequest) (*Client, error)
+	FindAllClients(ctx context.Context) ([]Client, error)
 }
 
 type repository struct {
@@ -39,4 +40,13 @@ func (r *repository) CreateClient(ctx context.Context, req CreateClientRequest) 
 	}
 
 	return &newClient, nil
+}
+
+func (r *repository) FindAllClients(ctx context.Context) ([]Client, error) {
+	var clients []Client
+	result := r.db.WithContext(ctx).Find(&clients)
+	if result.Error != nil {
+		return nil, errors.HandleGormError(result.Error, "client")
+	}
+	return clients, nil
 }

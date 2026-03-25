@@ -59,6 +59,7 @@ func main() {
 			clientGroup := v1.Group("/clients")
 			{
 				clientGroup.POST("/", clientHandler.CreateClient)
+				clientGroup.GET("/", clientHandler.FindAllClients)
 			}
 		}
 	}

@@ -6,6 +6,7 @@ import (
 
 type Service interface {
 	CreateClient(ctx context.Context, req CreateClientRequest) (*Client, error)
+	FindAllClients(ctx context.Context) ([]Client, error)
 }
 
 type service struct {
@@ -23,4 +24,13 @@ func (s *service) CreateClient(ctx context.Context, req CreateClientRequest) (*C
 	}
 
 	return client, nil
+}
+
+func (s *service) FindAllClients(ctx context.Context) ([]Client, error) {
+	clients, err := s.repo.FindAllClients(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return clients, nil
 }
