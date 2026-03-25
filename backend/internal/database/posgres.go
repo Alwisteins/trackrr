@@ -1,12 +1,18 @@
 package database
 
 import (
-	"database/sql"
 	"os"
+
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
-func NewPostgres() (*sql.DB, error) {
+func NewPostgres() (*gorm.DB, error) {
 	dsn := os.Getenv("DATABASE_URL")
 
-	return sql.Open("postgres", dsn)
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		return nil, err
+	}
+	return db, nil
 }

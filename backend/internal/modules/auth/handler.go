@@ -4,6 +4,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+
+	"backend/internal/errors"
 )
 
 type Handler struct {
@@ -23,16 +25,36 @@ func (h *Handler) Login(c *gin.Context) {
 	var req LoginRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": err.Error(),
+		appErr := errors.NewValidationError("VALIDATION_ERROR", err.Error())
+		c.JSON(appErr.StatusCode, gin.H{
+			"error": gin.H{
+				"code":    appErr.Code,
+				"message": appErr.Message,
+			},
 		})
 		return
 	}
 
 	user, err := h.service.Login(c.Request.Context(), req.Email, req.Password)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"message": err.Error(),
+		// Check if it's an AppError
+		if appErr, ok := err.(*errors.AppError); ok {
+			c.JSON(appErr.StatusCode, gin.H{
+				"error": gin.H{
+					"code":    appErr.Code,
+					"message": appErr.Message,
+				},
+			})
+			return
+		}
+
+		// Fallback for unexpected errors
+		genericErr := errors.NewInternalError("UNKNOWN_ERROR", "An unexpected error occurred", err)
+		c.JSON(genericErr.StatusCode, gin.H{
+			"error": gin.H{
+				"code":    genericErr.Code,
+				"message": genericErr.Message,
+			},
 		})
 		return
 	}

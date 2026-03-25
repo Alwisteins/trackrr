@@ -2,7 +2,10 @@ package auth
 
 import (
 	"context"
-	"database/sql"
+
+	"gorm.io/gorm"
+
+	"backend/internal/errors"
 )
 
 type Repository interface {
@@ -10,26 +13,21 @@ type Repository interface {
 }
 
 type repository struct {
-	db *sql.DB
+	db *gorm.DB
 }
 
-func NewRepository(db *sql.DB) Repository {
+func NewRepository(db *gorm.DB) Repository {
 	return &repository{db}
 }
 
 func (r *repository) FindByIdentifier(ctx context.Context, identifier string) (*User, error) {
-	query := `
-		SELECT id, email, password, role
-		FROM users
-		WHERE email = $1 OR WHERE username = $1
-	`
-
 	user := &User{}
-	err := r.db.QueryRowContext(ctx, query, identifier).
-		Scan(&user.ID, &user.Email, &user.Password, &user.Role)
+	err := r.db.WithContext(ctx).
+		Where("email = ? OR username = ?", identifier, identifier).
+		First(user).Error
 
 	if err != nil {
-		return nil, err
+		return nil, errors.HandleGormError(err, "user")
 	}
 
 	return user, nil

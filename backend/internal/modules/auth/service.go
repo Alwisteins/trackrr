@@ -2,8 +2,8 @@ package auth
 
 import (
 	"context"
-	"errors"
 
+	"backend/internal/errors"
 	"backend/internal/utils"
 )
 
@@ -22,12 +22,12 @@ func NewService(repo Repository) Service {
 func (s *service) Login(ctx context.Context, identifier, password string) (*User, error) {
 	user, err := s.repo.FindByIdentifier(ctx, identifier)
 	if err != nil {
-		return nil, errors.New("email atau password salah")
+		return nil, errors.NewUnauthorizedError("INVALID_CREDENTIALS", "email atau password salah")
 	}
 
 	// compare password
 	if !utils.CheckPasswordHash(password, user.Password) {
-		return nil, errors.New("email atau password salah")
+		return nil, errors.NewUnauthorizedError("INVALID_CREDENTIALS", "email atau password salah")
 	}
 
 	return user, nil
