@@ -1,1 +1,1 @@
-DELETE TABLE IF EXISTS project_notes;
+DROP TABLE IF EXISTS project_notes;

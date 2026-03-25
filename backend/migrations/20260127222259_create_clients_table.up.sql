@@ -1,5 +1,5 @@
 CREATE TABLE clients (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     uuid UUID NOT NULL DEFAULT gen_random_uuid(),
     company_name VARCHAR(255) NOT NULL UNIQUE,
     contact_name VARCHAR(255) NOT NULL,
