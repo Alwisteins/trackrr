@@ -4,20 +4,47 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 
 	"backend/internal/database"
 	"backend/internal/modules/auth"
+	"backend/internal/modules/client"
 )
 
 func main() {
-	db, err := database.NewPostgres()
-	if err != nil {
-		log.Fatal(err)
+	// Try multiple paths for .env
+	envPaths := []string{
+		".env",       // Current directory
+		"../../.env", // If running from backend/cmd/api
+		"../.env",    // If running from backend/
 	}
 
+	var loaded bool
+	for _, path := range envPaths {
+		if err := godotenv.Load(path); err == nil {
+			log.Println("✓ Loaded .env from:", path)
+			loaded = true
+			break
+		}
+	}
+
+	if !loaded {
+		log.Println("Warning: Could not load .env file from any path")
+	}
+
+	db, errDB := database.NewPostgres()
+	if errDB != nil {
+		log.Fatal(errDB)
+	}
+
+	// Initialize repositories, services, and handlers
 	authRepo := auth.NewRepository(db)
 	authService := auth.NewService(authRepo)
 	authHandler := auth.NewHandler(authService)
+
+	clientRepo := client.NewRepository(db)
+	clientService := client.NewService(clientRepo)
+	clientHandler := client.NewHandler(clientService)
 
 	r := gin.Default()
 
@@ -28,6 +55,10 @@ func main() {
 			authGroup := v1.Group("/auth")
 			{
 				authGroup.POST("/login", authHandler.Login)
+			}
+			clientGroup := v1.Group("/clients")
+			{
+				clientGroup.POST("/", clientHandler.CreateClient)
 			}
 		}
 	}
