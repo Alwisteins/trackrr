@@ -98,3 +98,36 @@ func (h *Handler) FindAllClients(c *gin.Context) {
 		"data":    clients,
 	})
 }
+
+func (h *Handler) FindClientByUUID(c *gin.Context) {
+	uuid := c.Param("uuid")
+	client, err := h.service.FindClientByUUID(c.Request.Context(), uuid)
+
+	if err != nil {
+		// Check if it's an AppError
+		if appErr, ok := err.(*errors.AppError); ok {
+			c.JSON(appErr.StatusCode, gin.H{
+				"error": gin.H{
+					"code":    appErr.Code,
+					"message": appErr.Message,
+				},
+			})
+			return
+		}
+
+		// Fallback for unexpected errors
+		genericErr := errors.NewInternalError("UNKNOWN_ERROR", "An unexpected error occurred", err)
+		c.JSON(genericErr.StatusCode, gin.H{
+			"error": gin.H{
+				"code":    genericErr.Code,
+				"message": genericErr.Message,
+			},
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "client retrieved successfully",
+		"data":    client,
+	})
+}

@@ -60,6 +60,7 @@ func main() {
 			{
 				clientGroup.POST("/", clientHandler.CreateClient)
 				clientGroup.GET("/", clientHandler.FindAllClients)
+				clientGroup.GET("/:uuid", clientHandler.FindClientByUUID)
 			}
 		}
 	}
