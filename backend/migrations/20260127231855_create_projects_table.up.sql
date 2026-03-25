@@ -5,7 +5,7 @@ CREATE TYPE project_status AS ENUM (
     'review',
     'completed',
     'archived'
-)
+);
 
 CREATE TABLE projects (
     id BIGSERIAL PRIMARY KEY,
@@ -15,8 +15,10 @@ CREATE TABLE projects (
     status project_status DEFAULT 'not started',
     progress INT DEFAULT 0,
     deadline DATE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    client_id BIGINT,
+    pic_id BIGINT,
     CONSTRAINT fk_client
       FOREIGN KEY (client_id) REFERENCES clients(id),
     CONSTRAINT fk_user

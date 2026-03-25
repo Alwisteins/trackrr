@@ -1,21 +1,36 @@
 package main
 
 import (
-	"net/http"
+	"log"
 
 	"github.com/gin-gonic/gin"
+
+	"backend/internal/database"
+	"backend/internal/modules/auth"
 )
 
 func main() {
-	router := gin.Default()
+	db, err := database.NewPostgres()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	router.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"Name":    "Alwi",
-			"Bio":     "Day 1 learning Golang with Gin",
-			"message": "Hello World!",
-		})
-	})
+	authRepo := auth.NewRepository(db)
+	authService := auth.NewService(authRepo)
+	authHandler := auth.NewHandler(authService)
 
-	router.Run()
+	r := gin.Default()
+
+	api := r.Group("/api")
+	{
+		v1 := api.Group("/v1")
+		{
+			authGroup := v1.Group("/auth")
+			{
+				authGroup.POST("/login", authHandler.Login)
+			}
+		}
+	}
+
+	r.Run(":8080")
 }
