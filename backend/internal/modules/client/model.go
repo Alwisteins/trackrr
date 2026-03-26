@@ -14,7 +14,7 @@ type Client struct {
 	UpdatedAt    time.Time `json:"updated_at" db:"updated_at"`
 }
 
-type CreateClientRequest struct {
+type ClientRequest struct {
 	CompanyName  string `json:"company_name" binding:"required,min=2"`
 	ContactName  string `json:"contact_name" binding:"required"`
 	ContactEmail string `json:"contact_email" binding:"omitempty,email"`
