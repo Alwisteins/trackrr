@@ -1,0 +1,7 @@
+{
+  "folders": [
+    { "name": "Root", "path": "." },
+    { "name": "Backend (Go)", "path": "backend" },
+    { "name": "Frontend (Next.js)", "path": "frontend" },
+  ],
+}

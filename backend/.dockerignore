@@ -1,0 +1,22 @@
+# Environment
+.env
+.env.*
+!.env.example
+
+# Go caches & compiled artifacts
+.gocache/
+.gomodcache/
+*.exe
+*.out
+*.test
+api.exe
+
+# Logs
+*.log
+
+# Git & editor
+.git/
+.gitignore
+.DS_Store
+.idea/
+.vscode/

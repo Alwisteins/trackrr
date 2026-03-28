@@ -1,0 +1,29 @@
+# Dependencies (akan di-reinstall)
+node_modules/
+
+# Build output (akan di-rebuild)
+.next/
+out/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-error.log*
+
+# Claude
+.claude/
+
+# Git & editor
+.git/
+.gitignore
+.DS_Store
+.idea/
+.vscode/
+
+# Docs
+README.md
