@@ -1,8 +1,6 @@
 package auth
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 
 	"backend/internal/errors"
@@ -16,28 +14,23 @@ func NewHandler(service Service) *Handler {
 	return &Handler{service}
 }
 
-type LoginRequest struct {
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required"`
-}
-
-func (h *Handler) Login(c *gin.Context) {
-	var req LoginRequest
+func (h *Handler) Register(c *gin.Context) {
+	var req RegisterRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		appErr := errors.NewValidationError("VALIDATION_ERROR", err.Error())
+		appErr := errors.NewValidationError("VALIDATION_ERROR", "Validation failed")
 		c.JSON(appErr.StatusCode, gin.H{
 			"error": gin.H{
 				"code":    appErr.Code,
 				"message": appErr.Message,
+				"fields":  errors.ParseValidationErrors(err),
 			},
 		})
 		return
 	}
 
-	user, err := h.service.Login(c.Request.Context(), req.Email, req.Password)
+	user, token, err := h.service.Register(c.Request.Context(), &req)
 	if err != nil {
-		// Check if it's an AppError
 		if appErr, ok := err.(*errors.AppError); ok {
 			c.JSON(appErr.StatusCode, gin.H{
 				"error": gin.H{
@@ -48,8 +41,7 @@ func (h *Handler) Login(c *gin.Context) {
 			return
 		}
 
-		// Fallback for unexpected errors
-		genericErr := errors.NewInternalError("UNKNOWN_ERROR", "An unexpected error occurred", err)
+		genericErr := errors.NewInternalError("UNKNOWN_ERROR", "An unexpected error occured", err)
 		c.JSON(genericErr.StatusCode, gin.H{
 			"error": gin.H{
 				"code":    genericErr.Code,
@@ -59,12 +51,66 @@ func (h *Handler) Login(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "login berhasil",
+	c.JSON(201, gin.H{
+		"message": "successfully registered",
 		"data": gin.H{
 			"id":    user.ID,
 			"email": user.Email,
-			"role":  user.Role,
+			"name":  user.Name,
 		},
+		"token": token,
 	})
 }
+
+// type LoginRequest struct {
+// 	Email    string `json:"email" binding:"required,email"`
+// 	Password string `json:"password" binding:"required"`
+// }
+
+// func (h *Handler) Login(c *gin.Context) {
+// 	var req LoginRequest
+
+// 	if err := c.ShouldBindJSON(&req); err != nil {
+// 		appErr := errors.NewValidationError("VALIDATION_ERROR", err.Error())
+// 		c.JSON(appErr.StatusCode, gin.H{
+// 			"error": gin.H{
+// 				"code":    appErr.Code,
+// 				"message": appErr.Message,
+// 			},
+// 		})
+// 		return
+// 	}
+
+// 	user, err := h.service.Login(c.Request.Context(), req.Email, req.Password)
+// 	if err != nil {
+// 		// Check if it's an AppError
+// 		if appErr, ok := err.(*errors.AppError); ok {
+// 			c.JSON(appErr.StatusCode, gin.H{
+// 				"error": gin.H{
+// 					"code":    appErr.Code,
+// 					"message": appErr.Message,
+// 				},
+// 			})
+// 			return
+// 		}
+
+// 		// Fallback for unexpected errors
+// 		genericErr := errors.NewInternalError("UNKNOWN_ERROR", "An unexpected error occurred", err)
+// 		c.JSON(genericErr.StatusCode, gin.H{
+// 			"error": gin.H{
+// 				"code":    genericErr.Code,
+// 				"message": genericErr.Message,
+// 			},
+// 		})
+// 		return
+// 	}
+
+// 	c.JSON(http.StatusOK, gin.H{
+// 		"message": "login berhasil",
+// 		"data": gin.H{
+// 			"id":    user.ID,
+// 			"email": user.Email,
+// 			"role":  user.Role,
+// 		},
+// 	})
+// }

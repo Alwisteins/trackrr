@@ -7,8 +7,46 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/go-playground/validator/v10"
 	"gorm.io/gorm"
 )
+
+type FieldError struct {
+	Field   string `json:"field"`
+	Message string `json:"message"`
+}
+
+func ParseValidationErrors(err error) []FieldError {
+	var ve validator.ValidationErrors
+	if !errors.As(err, &ve) {
+		return nil
+	}
+
+	fields := make([]FieldError, len(ve))
+	for i, fe := range ve {
+		fields[i] = FieldError{
+			Field:   strings.ToLower(fe.Field()),
+			Message: validationMessage(fe),
+		}
+	}
+	return fields
+}
+
+func validationMessage(fe validator.FieldError) string {
+	field := strings.ToLower(fe.Field())
+	switch fe.Tag() {
+	case "required":
+		return fmt.Sprintf("%s is required", field)
+	case "email":
+		return "invalid email format"
+	case "min":
+		return fmt.Sprintf("%s must be at least %s characters", field, fe.Param())
+	case "max":
+		return fmt.Sprintf("%s must be at most %s characters", field, fe.Param())
+	default:
+		return fmt.Sprintf("%s is invalid", field)
+	}
+}
 
 // AppError represents a structured application error
 type AppError struct {
@@ -96,27 +134,18 @@ func HandleGormError(err error, context string) *AppError {
 		)
 	}
 
-	// Check for PostgreSQL unique constraint violation
-	if strings.Contains(err.Error(), "duplicate key value") {
-		return NewConflictError(
-			"DUPLICATE_ENTRY",
-			fmt.Sprintf("%s already exists", context),
-		)
-	}
-
-	// Check for specific constraint violations
-	if strings.Contains(err.Error(), "violates unique constraint") {
-		// Extract field name from constraint name if possible
-		if strings.Contains(err.Error(), "company_name") {
-			return NewConflictError(
-				"DUPLICATE_COMPANY_NAME",
-				"Client with this company name already exists",
-			)
-		}
+	// Check for PostgreSQL unique constraint violation (specific fields first)
+	if strings.Contains(err.Error(), "duplicate key value") || strings.Contains(err.Error(), "violates unique constraint") {
 		if strings.Contains(err.Error(), "email") {
 			return NewConflictError(
 				"DUPLICATE_EMAIL",
 				"User with this email already exists",
+			)
+		}
+		if strings.Contains(err.Error(), "company_name") {
+			return NewConflictError(
+				"DUPLICATE_COMPANY_NAME",
+				"Client with this company name already exists",
 			)
 		}
 		return NewConflictError(

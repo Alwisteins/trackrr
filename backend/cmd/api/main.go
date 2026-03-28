@@ -58,7 +58,7 @@ func main() {
 		{
 			authGroup := v1.Group("/auth")
 			{
-				authGroup.POST("/login", authHandler.Login)
+				authGroup.POST("/register", authHandler.Register)
 			}
 			clientGroup := v1.Group("/clients")
 			{
