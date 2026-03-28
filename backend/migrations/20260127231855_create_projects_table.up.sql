@@ -18,9 +18,10 @@ CREATE TABLE projects (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     client_id BIGINT,
-    pic_id BIGINT,
-    CONSTRAINT fk_client
-      FOREIGN KEY (client_id) REFERENCES clients(id),
-    CONSTRAINT fk_user
-      FOREIGN KEY (pic_id) REFERENCES users(id)
+    org_id BIGINT,
+    created_by BIGINT,
+    CONSTRAINT fk_org
+      FOREIGN KEY (org_id) REFERENCES organisations(id),
+    CONSTRAINT fk_created_by
+      FOREIGN KEY (created_by) REFERENCES users(id)
 );

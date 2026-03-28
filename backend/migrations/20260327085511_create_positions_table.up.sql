@@ -1,0 +1,9 @@
+CREATE TABLE positions (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    org_id BIGINT,
+    CONSTRAINT fk_org
+      FOREIGN KEY (org_id) REFERENCES organisations(id)
+);

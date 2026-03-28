@@ -8,3 +8,6 @@ CREATE TABLE task_assignees (
     CONSTRAINT fk_user
       FOREIGN KEY (user_id) REFERENCES users(id)
 );
+
+CREATE INDEX idx_task_assignees_task_id ON task_assignees(task_id);
+CREATE INDEX idx_task_assignees_user_id ON task_assignees(user_id);
