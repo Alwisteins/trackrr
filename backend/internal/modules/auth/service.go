@@ -9,7 +9,7 @@ import (
 
 type Service interface {
 	Register(ctx context.Context, req *RegisterRequest) (*User, string, error)
-	Login(ctx context.Context, email, password string) (*User, error)
+	Login(ctx context.Context, email, password string) (*User, string, error)
 }
 
 type service struct {
@@ -34,16 +34,21 @@ func (s *service) Register(ctx context.Context, req *RegisterRequest) (*User, st
 	return user, token, nil
 }
 
-func (s *service) Login(ctx context.Context, identifier, password string) (*User, error) {
-	user, err := s.repo.FindByIdentifier(ctx, identifier)
+func (s *service) Login(ctx context.Context, email string, password string) (*User, string, error) {
+	user, err := s.repo.Login(ctx, email)
 	if err != nil {
-		return nil, errors.NewUnauthorizedError("INVALID_CREDENTIALS", "email atau password salah")
+		return nil, "", errors.NewUnauthorizedError("INVALID_CREDENTIALS", "email atau password salah")
 	}
 
 	// compare password
 	if !utils.CheckPasswordHash(password, user.Password) {
-		return nil, errors.NewUnauthorizedError("INVALID_CREDENTIALS", "email atau password salah")
+		return nil, "", errors.NewUnauthorizedError("INVALID_CREDENTIALS", "email atau password salah")
 	}
 
-	return user, nil
+	token, err := utils.GenerateToken(user.UUID)
+	if err != nil {
+		return nil, "", errors.NewInternalError("TOKEN_ERROR", "Failed to generate token", err)
+	}
+
+	return user, token, nil
 }

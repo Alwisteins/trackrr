@@ -12,7 +12,7 @@ import (
 
 type Repository interface {
 	Register(ctx context.Context, req *RegisterRequest) (*User, error)
-	FindByIdentifier(ctx context.Context, identifier string) (*User, error)
+	Login(ctx context.Context, email string) (*User, error)
 }
 
 type repository struct {
@@ -21,19 +21,6 @@ type repository struct {
 
 func NewRepository(db *gorm.DB) Repository {
 	return &repository{db}
-}
-
-func (r *repository) FindByIdentifier(ctx context.Context, identifier string) (*User, error) {
-	user := &User{}
-	err := r.db.WithContext(ctx).
-		Where("email = ? OR username = ?", identifier, identifier).
-		First(user).Error
-
-	if err != nil {
-		return nil, errors.HandleGormError(err, "user")
-	}
-
-	return user, nil
 }
 
 func (r *repository) Register(ctx context.Context, req *RegisterRequest) (*User, error) {
@@ -58,4 +45,15 @@ func (r *repository) Register(ctx context.Context, req *RegisterRequest) (*User,
 	}
 
 	return newUser, nil
+}
+
+func (r *repository) Login(ctx context.Context, email string) (*User, error) {
+	user := &User{}
+	err := r.db.WithContext(ctx).First(user, "email = ?", email).Error
+
+	if err != nil {
+		return nil, errors.HandleGormError(err, "user")
+	}
+
+	return user, nil
 }
